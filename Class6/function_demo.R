@@ -1,0 +1,19 @@
+add <- function(x,y=1){
+  x+y
+}
+add(x=4)
+add(x=4,y=10)
+add(4,20)
+
+
+
+
+rescale <-function(x){
+  rng<-range(x)
+  x<- (x-rng[1])/(rng[2]-rng[1])
+  
+  x
+}
+rescale(1:10)
+
+rescale(c(1,NA,2,3,4))
