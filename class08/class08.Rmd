@@ -284,4 +284,5 @@ head(rna.data)
 ```{r}
 dim(rna.data)
 ```
-There are 100 genes and 10 samples. 
+There are 100 genes and 10 samples.
+
