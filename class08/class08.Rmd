@@ -1,0 +1,287 @@
+---
+title: "Machine Learning 1"
+author: 'Tianru Zhang (PID: A15432834)'
+date: "10/21/2021"
+output: pdf_document
+---
+
+First step is clustering methods
+#Kmeans clustering
+The function in the base R to do Kmeans clustering is called `Kmeans()`.
+
+First, make up some data which nobody knows what the answer should be.
+```{r}
+tmp <-c(rnorm(30,-3),rnorm(30,3))
+x<-cbind(x=tmp,y=rev(tmp))
+plot(x)
+```
+ 
+>Q1. Can we do Kmeans() to cluster this data setting k=2 and nstart=20?
+
+
+```{r}
+km<-kmeans(x,centers=2, nstart=20)
+
+km
+```
+
+Thus, we can do this clustering.
+
+>Q2. How many points are there in each cluster?
+
+```{r}
+km$size
+```
+
+>Q3. What component of the result object details cluster assignment/membership?
+
+
+```{r}
+km$cluster
+```
+
+>Q4. What component of the result object details the cluster centers?
+
+
+```{r}
+km$centers
+```
+
+
+
+
+>Q5 Plot x colored by the kmeans cluster assignment and
+ add cluster centers as blue points
+ 
+ 
+```{r}
+plot(x,col=km$cluster)
+points(km$centers,col="blue",pch=16, cex=2)
+```
+ 
+ 
+ #hclust
+ 
+ A big limitation with k-means is that we have to tell it the value of k(the number of clusters we want)
+ Analyze with hclust, and demonstrate the use of dist(),hclust(),plot() and cutree() functions to do the clustering.
+ Generate dendrograms and return cluster assignments to membership vectors. 
+ 
+ 
+```{r}
+
+hc<-hclust(dist(x))
+hc
+```
+
+There is a plot method for hclust result objects.
+Let's see it!!
+
+```{r}
+plot(hc)
+```
+
+
+
+To get the clustering membership vector we have to do a bit more work. 
+We have to cut the tree dendrogram where we consider making sense. 
+Use the `cutree()`function
+
+```{r}
+cutree(hc, h=6)
+```
+
+You can also call `cutree()` setting k=number of groups/clusters 
+
+```{r}
+grps<-cutree(hc, k=2)
+
+```
+
+
+Make the plot of groups
+
+```{r}
+plot(x,col=grps)
+```
+
+
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url)
+```
+
+
+#Principal component data analysis(PCA)
+
+##Getting data
+
+>Q1.How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+
+
+```{r}
+dim(x)
+```
+
+There are 17 rows and 5 columns. Whoops! There should only be four, because the first column is literally the names of rows.
+
+
+```{r}
+head(x)
+```
+
+
+The first way to fix the column name issue:
+```{r}
+# Note how the minus indexing works
+rownames(x) <- x[,1]
+x <- x[,-1]
+head(x)
+
+```
+
+
+```{r}
+dim(x)
+```
+
+The second way to fix:
+```{r}
+x <- read.csv(url, row.names=1)
+head(x)
+```
+ >Q2. Which approach to solving the ‘row-names problem’ mentioned above do you prefer and why? Is one approach more robust than another under certain circumstances?
+ 
+ I prefer the second method, because with the first approach, if we run x <- x[,-1]), multiple times, it will lose column information and override the table.
+ 
+ 
+ 
+##Spotting major differneces and trends
+Now that the data looks good, we will analyze it with some conventional plots.
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+>Q3: Changing what optional argument in the above barplot() function results in the following plot?
+
+
+```{r}
+barplot(as.matrix(x), beside=FALSE, col=rainbow(nrow(x)))
+barplot(as.matrix(x), col=rainbow(nrow(x)))
+```
+By setting the beside parameter to FALSE, or leaving the argument, will generate the new plot as above.
+
+ The stacked plot is not helpful to look at.
+ 
+ 
+ 
+ >Q5: Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot?
+ 
+ 
+ 
+```{r}
+pairs(x, col=rainbow(17), pch=16)
+```
+ This graph plots each country against each other. If a point lies on the diagonal, it means the two countries have the same amount of food consumption for that type of food.
+ 
+ 
+ 
+ >Q6. What is the main differences between N. Ireland and the other countries of the UK in terms of this data-set?
+ 
+ The N. Ireland has one food consumption that significantly exceeds any other country in UK. But it's hrad to tell which food it is based on the plot alone.
+ 
+#PCA to the rescue!
+ 
+ The main function in base R for PCA is `prcomp()`.
+ This function transposes our data.
+ 
+```{r}
+# Use the prcomp() PCA function 
+#t(x) takes the transpose of our data
+pca <- prcomp( t(x) )
+summary(pca)
+```
+ 
+```{r}
+attributes(pca)
+```
+
+
+```{r}
+plot(pca$x[,1],pca$x[,2])
+```
+
+
+
+>Q7. Complete the code below to generate a plot of PC1 vs PC2. The second line adds text labels over the data points.
+
+
+
+```{r}
+# Plot PC1 vs PC2
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x))
+```
+
+>Q8. Customize your plot so that the colors of the country names match the colors in our UK and Ireland map and table at start of this document.
+
+
+```{r}
+
+color<-c("red","blue","purple","orange")
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500),col=color)
+text(pca$x[,1], pca$x[,2], colnames(x),col=color)
+```
+
+
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+
+```
+
+```{r}
+## or the second row here...
+z <- summary(pca)
+z$importance
+```
+
+```{r}
+barplot(v, xlab="Principal Component", ylab="Percent Variation")
+```
+
+#Diving Deeper
+
+
+```{r}
+## Lets focus on PC1 as it accounts for > 90% of variance 
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+
+```
+This PC1 analysis shows difference in fresh fruit and alcoholic drinks 
+
+>Q9: Generate a similar ‘loadings plot’ for PC2. What two food groups feature prominantely and what does PC2 maninly tell us about?
+Fresh potatoes and soft drinks prominantely shows difference in consumption.
+
+```{r}
+## Lets focus on PC2 as it accounts for > 90% of variance 
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,2], las=2 )
+```
+
+
+
+
+#PCA of RNA-seq data
+```{r}
+url2 <- "https://tinyurl.com/expression-CSV"
+rna.data <- read.csv(url2, row.names=1)
+head(rna.data)
+```
+>Q10: How many genes and samples are in this data set?
+
+```{r}
+dim(rna.data)
+```
+There are 100 genes and 10 samples. 
