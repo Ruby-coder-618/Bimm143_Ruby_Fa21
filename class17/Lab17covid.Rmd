@@ -1,0 +1,329 @@
+---
+title: "Lab17: COVID vaccine rate mini project"
+author: 'Tianru Zhang (PID: A15432834)'
+date: "11/23/2021"
+output:
+  pdf_document:
+    latex_engine: xelatex
+---
+
+
+#Background
+Vaccination rates across the states would be important guides for us thru our holiday travels.
+```{r}
+# Import vaccination data
+vax <- read.csv( "covid19vaccinesbyzipcode_test.csv" )
+head(vax)
+
+```
+
+#Ensure the usefulness of columns
+
+
+`Lubridate` package to make file easier to read and process
+```{r}
+library(lubridate)
+```
+```{r}
+today()
+```
+#Quick look at the data structure
+
+>Q1. What column details the total number of people fully vaccinated? 
+persons_fully_vaccinated
+
+
+
+
+>Q2. What column details the Zip code tabulation area? 
+zip_code_tabulation_area
+
+>Q3. What is the earliest date in this dataset? 
+2021-01-05
+
+```{r}
+head(vax$as_of_date)
+```
+
+>Q4. What is the latest date in this dataset? 
+2021-11-16
+
+
+```{r}
+tail(vax$as_of_date)
+```
+
+
+```{r}
+skimr::skim(vax)
+```
+
+
+>Q5. How many numeric columns are in this dataset?
+9
+
+
+>Q6. Note that there are “missing values” in the dataset. How many NA values there in the persons_fully_vaccinated column? 
+8256
+
+```{r}
+sum( is.na(vax$persons_fully_vaccinated) )
+```
+
+
+>Q7. What percent of persons_fully_vaccinated values are missing (to 2 significant figures)? 
+10.17%
+
+```{r}
+sum<-sum( is.na(vax$persons_fully_vaccinated))
+  100*sum/length(vax$persons_fully_vaccinated)
+```
+
+
+
+```{r}
+# Speciffy that we are using the Year-mont-day format
+vax$as_of_date <- ymd(vax$as_of_date)
+today() - vax$as_of_date[1]
+```
+```{r}
+vax$as_of_date[nrow(vax)] - vax$as_of_date[1]
+```
+
+
+```{r}
+today()-vax$as_of_date[nrow(vax)]
+```
+>Q9. How many days have passed since the last update of the dataset? 
+6
+
+>Q10. How many unique dates are in the dataset (i.e. how many different dates are detailed)? 
+46
+
+```{r}
+length(unique(vax$as_of_date))
+```
+
+#Working with ZIP codes
+One of the numeric columns in the dataset (namely vax$zip_code_tabulation_area) are actually ZIP codes - a postal code used by the United States Postal Service (USPS). In R we can use the zipcodeR package to make working with these codes easier. For example, let’s install and then load up this package and to find the centroid of the La Jolla 92037 (i.e. UC San Diego) ZIP code area.
+
+```{r}
+#install.packages("zipcodeR")
+library(zipcodeR)
+geocode_zip('92037')
+```
+
+
+```{r}
+zip_distance('92037','92109')
+reverse_zipcode(c('92037', "92109") )
+# Pull data for all ZIP codes in the dataset
+zipdata <- reverse_zipcode( vax$zip_code_tabulation_area )
+
+```
+```{r}
+# Subset to San Diego county only areas
+inds <-(vax$county=="San Diego")
+
+#use dplyr package and filter function
+
+library(dplyr)
+
+sd <- filter(vax, county == "San Diego")
+
+
+
+
+```
+
+How many entries there are for San Diego County??
+
+
+
+>Q11. How many distinct zip codes are listed for San Diego County? 
+107
+
+
+```{r}
+length(unique(sd$zip_code_tabulation_area))
+
+```
+>Q12. What San Diego County Zip code area has the largest 12 + Population in this dataset? 
+92154
+
+```{r}
+sd.10 <- filter(vax, county == "San Diego" &
+                age5_plus_population > 10000)
+```
+
+```{r}
+sd.12 <- filter(vax, county=="San Diego")
+ind <-which.max(sd.12$age12_plus_population)
+sd[ind,]
+```
+What is the population in the 92037 area?
+```{r}
+filter(sd,zip_code_tabulation_area=="92037")[1,]
+```
+
+
+
+Using dplyr select all San Diego “county” entries on “as_of_date” “2021-11-16” and use this for the following questions.
+
+>Q13. What is the overall average “Percent of Population Fully Vaccinated” value for all San Diego “County” as of “2021-11-09”? 
+0.67
+
+
+```{r}
+sd.now1 <- filter(vax, county == "San Diego" &
+                as_of_date=="2021-11-09")
+mean(sd.now1$percent_of_population_fully_vaccinated, na.rm=TRUE)
+```
+
+```{r}
+summary(sd.now1$percent_of_population_fully_vaccinated)
+```
+
+
+
+
+>Q14. Using either ggplot or base R graphics make a summary figure that shows the distribution of Percent of Population Fully Vaccinated values as of “2021-11-09”?
+
+1. Base R hist function
+```{r}
+
+hist(sd.now1$percent_of_population_fully_vaccinated)
+
+```
+2. Using ggplot
+```{r}
+library(ggplot2)
+
+ggplot(sd.now1)+
+  aes(percent_of_population_fully_vaccinated)+
+  labs(x="Percent of Population Fully Vaccinated values as of 2021-11-09", y="count")+
+  geom_histogram(bins=15)
+#"Percent of Population Fully Vaccinated values as of 2021-11-09"
+```
+What about 92037 - UCSD/La Jolla?
+```{r}
+ucsd<-filter(sd, zip_code_tabulation_area=="92037")
+```
+
+```{r}
+ucsd[1,]$age5_plus_population
+```
+
+
+>Q15. Using ggplot make a graph of the vaccination rate time course for the 92037 ZIP code area:
+
+```{r}
+ggplot(ucsd) +
+  aes(as_of_date,percent_of_population_fully_vaccinated) +
+  geom_point() +
+  geom_line(group=1) +
+  ylim(c(0,1)) +
+  labs("Vaccination rate for La Jolla 92037",x="Date", y="Percent Vaccinated")+
+  geom_hline(yintercept=0.66)
+```
+
+
+
+
+
+#Comparing 92037 to other similar sized areas?
+Let’s return to the full dataset and look across every zip code area with a population at least as large as that of 92037 on as_of_date “2021-11-16”.
+
+
+```{r}
+# Subset to all CA areas with a population as large as 92037
+vax.36 <- filter(vax, age5_plus_population > 36144 &
+                as_of_date == "2021-11-16")
+
+#head(vax.36)
+```
+
+>Q16. Calculate the mean “Percent of Population Fully Vaccinated” for ZIP code areas with a population as large as 92037 (La Jolla) as_of_date “2021-11-16”. Add this as a straight horizontal line to your plot from above with the geom_hline() function?
+The mean is 0.6629812.
+
+
+```{r}
+mean(vax.36$percent_of_population_fully_vaccinated)
+```
+```{r}
+ggplot(ucsd) +
+  aes(as_of_date,percent_of_population_fully_vaccinated) +
+  geom_point() +
+  geom_line(group=1) +
+  ylim(c(0,1)) +
+  labs("Vaccination rate for La Jolla 92037",x="Date", y="Percent Vaccinated")+
+  geom_hline(yintercept=0.66)
+```
+
+
+>Q17. What is the 6 number summary (Min, 1st Qu., Median, Mean, 3rd Qu., and Max) of the “Percent of Population Fully Vaccinated” values for ZIP code areas with a population as large as 92037 (La Jolla) as_of_date “2021-11-16”?
+Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3519  0.5891  0.6649  0.6630  0.7286  1.0000
+ 
+```{r}
+summary((vax.36$percent_of_population_fully_vaccinated))
+```
+
+
+>Q18. Using ggplot generate a histogram of this data.
+
+```{r}
+ggplot(vax.36)+
+  aes(percent_of_population_fully_vaccinated)+
+  labs(x="Percent Vaccined", y="count")+
+  geom_histogram(bins=15)
+```
+
+>Q19. Is the 92109 and 92040 ZIP code areas above or below the average value you calculated for all these above?
+The 92109 area is above the average value, while the 92040 is below the averga value.
+
+
+```{r}
+vax %>% filter(as_of_date == "2021-11-16") %>%  
+  filter(zip_code_tabulation_area=="92040") %>%
+  select(percent_of_population_fully_vaccinated)
+
+```
+```{r}
+vax %>% filter(as_of_date == "2021-11-16") %>%  
+  filter(zip_code_tabulation_area=="92109") %>%
+  select(percent_of_population_fully_vaccinated)
+```
+
+
+population in 92037 area:
+```{r}
+ucsd[1,]$age5_plus_population
+```
+First, need to subset the full vax dataset to include only zip code areas with a population as large as 92037
+
+```{r}
+vax.36.all<- filter(vax,age5_plus_population>36144)
+```
+
+
+```{r}
+length(unique(vax.36.all$zip_code_tabluation_area))
+#mean(sd1$percent_of_population_fully_vaccinated, na.rm=TRUE)
+```
+
+
+>Q20. Finally make a time course plot of vaccination progress for all areas in the full dataset with a age5_plus_population > 36144.
+
+
+```{r}
+ggplot(vax.36.all)+
+aes(as_of_date, percent_of_population_fully_vaccinated,
+    group=zip_code_tabulation_area)+
+  geom_line(alpha=0.2,col="blue")+
+  geom_hline(yintercept=0.66, col="red")
+  
+```
+
+>Q21. How do you feel about traveling for Thanksgiving and meeting for in-person class next Week?
+I feel it's necessary to wear masks and keep social distancing, as a large number of people still haven't got vaccinated. 

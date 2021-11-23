@@ -1,0 +1,30 @@
+---
+title: "blast results on zebra fish"
+author: "Tianru Zhang PID:A15432834"
+date: "11/9/2021"
+output: pdf_document
+---
+
+```{r}
+blast<-read.delim("mm-second.x.zebrafish.tsv")
+colnames(blast) <-c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
+
+hist(blast$bitscore)
+
+```
+
+
+
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+ggplot(blast)+
+  aes((pident*(qend-qstart)),bitscore)+
+  geom_point(alpha=0.1)+
+  geom_smooth()
+```
+
+
+
+
+
