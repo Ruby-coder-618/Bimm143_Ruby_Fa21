@@ -2,8 +2,9 @@
 title: "Machine Learning 1"
 author: 'Tianru Zhang (PID: A15432834)'
 date: "10/21/2021"
-output: pdf_document
+output: github_document
 ---
+
 
 First step is clustering methods
 #Kmeans clustering
