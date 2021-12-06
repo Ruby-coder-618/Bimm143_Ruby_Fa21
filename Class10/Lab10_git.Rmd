@@ -1,0 +1,85 @@
+---
+title: "Lab10_git"
+output: github_document
+---
+---
+title: "Haloween Candy"
+author: 'Tianru Zhang (PID: A15432834)'
+date: "10/28/2021"
+output: github_document
+---
+
+```{r}
+
+url<-"https://raw.githubusercontent.com/fivethirtyeight/data/master/candy-power-ranking/candy-data.csv"
+#candy_file <- read.csv(url)
+
+candy <- read.csv(url, row.names=1)
+head(candy,n=5)
+```
+
+>Q1.How many candy types: 85
+
+There are 85 types of candies in total.
+```{r}
+nrow(candy)
+```
+
+>Q2: How many fruity candy types?
+
+there are 38 of them.
+```{r}
+sum(candy$fruity)
+```
+#2. Favourite candy
+
+
+```{r}
+candy["Twix", ]$winpercent
+```
+>Q3. What is your favorite candy in the dataset and what is it’s winpercent value?
+
+```{r}
+candy["Haribo Happy Cola", ]$winpercent
+```
+My fav is Haribo Happy Cola and its winpercent value is 34%.
+
+
+>Q4. What is the winpercent value for “Kit Kat”?
+```{r}
+candy["Kit Kat", ]$winpercent
+```
+The percent is 76.77% for Kit Kat
+
+>Q5. What is the winpercent value for “Tootsie Roll Snack Bars”?
+
+```{r}
+candy["Tootsie Roll Snack Bars", ]$winpercent
+```
+The winpercent is 49.65% for Tootsie Roll Snack Bars.
+
+Side-note: the skimr::skim() function
+
+There is a useful skim() function in the skimr package that can help give you a quick overview of a given dataset. Let’s install this package and try it on our candy data.
+
+
+```{r}
+#install.packages("skimr")
+library("skimr")
+skim(candy)
+```
+>Q6. Is there any variable/column that looks to be on a different scale to the majority of the other columns in the dataset?
+
+Winpercent, it looks on a very different scale.
+
+
+>Q7. What do you think a zero and one represent for the candy$chocolate column?
+
+I think it indicates that the candy$chocolate stands for categorical data 
+
+
+>Q8. Plot a histogram of winpercent values
+
+```{r}
+hist(candy$winpercent)
+```

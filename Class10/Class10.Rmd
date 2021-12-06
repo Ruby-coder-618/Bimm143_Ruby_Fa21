@@ -2,7 +2,7 @@
 title: "Haloween Candy"
 author: 'Tianru Zhang (PID: A15432834)'
 date: "10/28/2021"
-output: github_document
+output: pdf_document
 ---
 
 ```{r}
