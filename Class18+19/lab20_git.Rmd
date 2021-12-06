@@ -1,0 +1,26 @@
+---
+title: "Class_20_git"
+output: github_document
+---
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+alignment<-read.fasta("Alignments")
+
+```
+```{r}
+help("bio3d")
+help("heatmap")
+```
+
+```{r}
+matrix<-seqidentity(alignment, normalize=TRUE, similarity=FALSE, ncore=1, nseg.scale=1)
+```
+```{r}
+heatmap(matrix)
+```
+
+
