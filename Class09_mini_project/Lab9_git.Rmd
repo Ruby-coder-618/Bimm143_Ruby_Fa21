@@ -1,26 +1,18 @@
 ---
-title: "Cancer_cluster"
-author: 'Tianru Zhang'
-date: "10/26/2021"
-output: pdf_document
+title: "Lab9_git"
+output: github_document
 ---
 
-##Exploratory data analysis:
+
 
 ```{r}
 # Save your input data file into your Project directory
-#fna.data <- "WisconsinCancer.csv"
+fna.data <- "WisconsinCancer.csv"
 
-# Complete the following code to input the data and store as 
-
-
-wisc.df <- read.csv("WisconsinCancer.csv")
+wisc.df <- read.csv("WisconsinCancer.csv", row.names=1)
 wisc.data <- wisc.df[,-1]
 diagnosis <- wisc.df$diagnosis
-
-
 ```
-
 
 
 
@@ -438,3 +430,4 @@ text(npc[,1], npc[,2], c(1,2), col="white")
 >Q18. Which of these new patients should we prioritize for follow up based on your results?
 
 Patient 2 should be prioritized because their cells fall in the malignant cells range.
+
