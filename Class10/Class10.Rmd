@@ -2,7 +2,7 @@
 title: "Haloween Candy"
 author: 'Tianru Zhang (PID: A15432834)'
 date: "10/28/2021"
-output: html_document
+output: github_document
 ---
 
 ```{r}
@@ -217,7 +217,7 @@ my_cols[as.logical(candy$fruity)]="red"
 ggplot(candy) +
   aes(winpercent, pricepercent, label=rownames(candy)) +
   geom_point(col=my_cols) + 
-  geom_text_repel(col=my_cols, size=2.3, max.overlaps = 7)
+  geom_text_repel(col=my_cols, size=2.3, max.overlaps = 117)
 
 ```
 
@@ -288,7 +288,7 @@ Again we can use the ggrepel package and the function ggrepel::geom_text_repel()
 ```{r}
 library(ggrepel)
 
-p + geom_text_repel(size=3.3, col=my_cols, max.overlaps = 7)  + 
+p + geom_text_repel(size=3.3, col=my_cols, max.overlaps = 117)  + 
   theme(legend.position = "none") +
   labs(title="Halloween Candy PCA Space",
        subtitle="Colored by type: chocolate bar (dark brown), chocolate other (light brown), fruity (red), other (black)",
